@@ -1,0 +1,25 @@
+# @package _global_
+# A100 SXM4 40 GB benchmark: 2.884 s/update at chunk 8 vs 3.119 s at cap 16.
+# Fixed synthetic replay, 64 candidates, BF16/rank-8 LoRA; COMET was a 3 GiB reserve.
+# See docs/research/GRPO_MT_BACKLOG.md for scope and measured memory; benchmark before changing caps.
+defaults:
+  - phomt_rl_diagnostics
+  - _self_
+
+data:
+  batch_size: 16
+  length_batching:
+    enabled: true
+    tokenizer_name_or_path: ${model.model_name_or_path}
+    candidate_multiplier: ${model.group_size}
+    # Bound generation using the full completion cap rather than reference length.
+    reserve_target_tokens: ${model.max_new_tokens}
+    max_tokens: 24576
+model:
+  max_source_length: 256
+  max_new_tokens: 128
+  logprob_batch_size: 8
+  logprob_token_budget: 3072
+  sort_candidates_by_length: true
+  trim_logprob_padding: true
+tags: [grpo, phomt, length-buckets, microbatch, throughput]

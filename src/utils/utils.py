@@ -1,6 +1,7 @@
 import warnings
+from collections.abc import Callable
 from importlib.util import find_spec
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any
 
 from omegaconf import DictConfig
 
@@ -62,20 +63,20 @@ def task_wrapper(task_func: Callable) -> Callable:
     :return: The wrapped task function.
     """
 
-    def wrap(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def wrap(cfg: DictConfig) -> tuple[dict[str, Any], dict[str, Any]]:
         # execute the task
         try:
             metric_dict, object_dict = task_func(cfg=cfg)
 
         # things to do if exception occurs
-        except Exception as ex:
+        except Exception:
             # save exception to `.log` file
             log.exception("")
 
             # some hyperparameter combinations might be invalid or cause out-of-memory errors
             # so when using hparam search plugins like Optuna, you might want to disable
             # raising the below exception to avoid multirun failure
-            raise ex
+            raise
 
         # things to always do after either success or exception
         finally:
@@ -95,7 +96,9 @@ def task_wrapper(task_func: Callable) -> Callable:
     return wrap
 
 
-def get_metric_value(metric_dict: Dict[str, Any], metric_name: Optional[str]) -> Optional[float]:
+def get_metric_value(
+    metric_dict: dict[str, Any], metric_name: str | None
+) -> float | None:
     """Safely retrieves value of the metric logged in LightningModule.
 
     :param metric_dict: A dict containing metric values.
@@ -107,7 +110,7 @@ def get_metric_value(metric_dict: Dict[str, Any], metric_name: Optional[str]) ->
         return None
 
     if metric_name not in metric_dict:
-        raise Exception(
+        raise ValueError(
             f"Metric value not found! <metric_name={metric_name}>\n"
             "Make sure metric name logged in LightningModule is correct!\n"
             "Make sure `optimized_metric` name in `hparams_search` config is correct!"

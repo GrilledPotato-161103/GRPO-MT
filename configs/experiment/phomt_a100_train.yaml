@@ -1,0 +1,18 @@
+# @package _global_
+# Fresh SFT -> GRPO rental configuration; the driver converts updates to batches.
+defaults:
+  - phomt_rl_throughput
+  - _self_
+
+final_validate: true
+trainer:
+  val_check_interval: 5000 # two optimizer updates per GRPO rollout
+  check_val_every_n_epoch: null
+  num_sanity_val_steps: 0
+model:
+  reward:
+    chrf_weight: 0.0
+    bleu_weight: 0.3
+    comet_weight: 0.7
+    comet_device: cuda:0
+tags: [grpo, phomt, a100, length-buckets, eval-every-10000-updates]

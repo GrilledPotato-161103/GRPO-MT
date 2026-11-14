@@ -1,0 +1,70 @@
+_target_: src.models.grpo_module.GRPOModule
+_convert_: all
+model_name_or_path: google/mt5-small
+revision: main
+base_revision: null
+tokenizer_name_or_path: null
+source_lang: English
+target_lang: Vietnamese
+tokenizer_src_lang: null
+language_codes: null
+forced_bos_token_id: null
+prompt_template: "Translate {source_lang} to {target_lang}: {source}"
+use_chat_template: false
+chat_template_kwargs: null
+source_content_limit: null
+strict_prompt_length: false
+max_source_length: 256
+max_new_tokens: 128
+group_size: 4
+num_iterations: 2
+temperature: 1.0
+clip_epsilon: 0.2
+beta: 0.04
+kl_control:
+  enabled: false
+  target: null # A sampled reference-KL target must be calibrated before enabling.
+  min_beta: 0.0025
+  max_beta: 0.04
+  rate: 0.1
+  ema_decay: 0.95
+  update_every: 100
+  quality_floors: {}
+learning_rate: 1.0e-6
+weight_decay: 0.01
+max_grad_norm: 1.0
+load_dtype: float32
+quantization: null
+gradient_checkpointing: false
+logprob_batch_size: null
+# Maximum padded source+completion tokens per scoring/backward graph.
+logprob_token_budget: null
+sort_candidates_by_length: true
+trim_logprob_padding: true
+warmup_steps: 0
+profiling:
+  enabled: false
+  synchronize_cuda: true
+diagnostics:
+  enabled: true
+  every_n_updates: 1
+  drift_every_n_updates: 20
+  audit_prompt_lengths: true
+  record_rollouts: true
+lora:
+  enabled: false
+  r: 8
+  alpha: 16
+  dropout: 0.0
+  target_modules: all-linear
+  warmup_steps: 10
+reward:
+  _target_: src.models.components.translation_reward.TranslationReward
+  chrf_weight: 1.0
+  bleu_weight: 0.0
+  comet_weight: 0.0
+  comet_model_name: Unbabel/wmt22-cometkiwi-da
+  comet_device: cpu
+  comet_batch_size: 8
+  comet_cache_dir: ${paths.log_dir}/comet
+  comet_api_key_env: HUGGING_FACE_API_KEY

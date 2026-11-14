@@ -1,0 +1,47 @@
+_target_: src.data.translation_datamodule.TranslationDataModule
+train_file: ${paths.data_dir}/example_train.jsonl
+val_file: ${paths.data_dir}/example_val.jsonl
+test_file: ${paths.data_dir}/example_test.jsonl
+source_column: en
+target_column: vi
+translation_column: null
+dataset_name: null
+dataset_config: null
+train_split: train
+val_split: null
+test_split: null
+val_fraction: 0.05
+batch_size: 2
+evaluation_batch_size: null
+num_workers: 0
+pin_memory: false
+persistent_workers: false
+prefetch_factor: 2
+disk_backed: false
+seed: ${seed}
+bidirectional: false
+paired_batches: false
+source_lang: ${model.source_lang}
+target_lang: ${model.target_lang}
+source_code: en
+target_code: vi
+length_batching:
+  enabled: false
+  tokenizer_name_or_path: ${model.model_name_or_path}
+  tokenizer_revision: ${model.revision}
+  source_cap: ${model.max_source_length}
+  target_cap: ${model.max_new_tokens}
+  prompt_template: ${model.prompt_template}
+  use_chat_template: ${model.use_chat_template}
+  chat_template_kwargs: ${model.chat_template_kwargs}
+  language_codes: ${model.language_codes}
+  bucket_width: 16
+  max_tokens: null
+  candidate_multiplier: 1
+  reserve_target_tokens: 0
+augmentation:
+  enabled: false
+  whitespace_probability: 0.2
+  unicode_probability: 0.2
+  concat_probability: 0.1
+  max_concat_chars: 768

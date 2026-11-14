@@ -1,0 +1,19 @@
+# @package _global_
+# Opt-in ablation; do not apply midway through a run.
+defaults:
+  - phomt_rl
+  - _self_
+data:
+  batch_size: 16
+model:
+  learning_rate: 5.0e-6
+  warmup_steps: 8
+  group_size: 4
+  num_iterations: 2
+  diagnostics:
+    enabled: true
+trainer:
+  log_every_n_steps: 1
+  num_sanity_val_steps: 0
+  val_check_interval: 10
+tags: [grpo, phomt, diagnostics, ablation]

@@ -1,0 +1,9 @@
+{
+  "source_cap": 256,
+  "target_cap": 128,
+  "batch_sizes": {"sft": 24, "rl": 48},
+  "comet_device": "cuda:0",
+  "comet_batch_size": 4,
+  "use_token_budget": false,
+  "verification_optimizer_steps": 10
+}

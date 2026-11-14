@@ -3,7 +3,6 @@ addopts = [
   "--color=yes",
   "--durations=0",
   "--strict-markers",
-  "--doctest-modules",
 ]
 filterwarnings = [
   "ignore::DeprecationWarning",
@@ -14,7 +13,8 @@ markers = [
   "slow: slow tests",
 ]
 minversion = "6.0"
-testpaths = "tests/"
+testpaths = ["tests/grpo"]
+norecursedirs = ["archive", "data", "logs"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -23,3 +23,80 @@ exclude_lines = [
     "raise NotImplementedError()",
     "if __name__ == .__main__.:",
 ]
+
+[tool.coverage.run]
+include = [
+  "*/scripts/main/*.py",
+  "*/src/models/grpo_module.py",
+  "*/src/models/anchored_grpo_module.py",
+  "*/src/models/components/correction_objective.py",
+  "*/src/models/self_play_module.py",
+  "*/src/models/sft_module.py",
+  "*/src/models/components/grpo.py",
+  "*/src/models/components/candidate_batching.py",
+  "*/src/models/components/adapters.py",
+  "*/src/models/components/optim/*.py",
+  "*/src/models/components/self_play.py",
+  "*/src/models/components/translation_reward.py",
+  "*/src/models/components/reward_diagnostics.py",
+  "*/src/models/components/reward_fusion.py",
+  "*/src/models/components/symmetric_alignment.py",
+  "*/src/models/components/comet_reward.py",
+  "*/src/data/components/*.py",
+  "*/src/data/translation_datamodule.py",
+  "*/src/data/self_play_datamodule.py",
+  "*/src/feedback/*.py",
+  "*/src/utils/self_play_timing.py",
+  "*/src/utils/phase_timing.py",
+  "*/src/utils/translation_telemetry.py",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+follow_imports = "silent"
+ignore_missing_imports = true
+files = [
+  "scripts/main",
+  "src/models/components/grpo.py",
+  "src/models/components/candidate_batching.py",
+  "src/models/components/adapters.py",
+  "src/models/components/optim",
+  "src/models/components/translation_reward.py",
+  "src/models/components/reward_diagnostics.py",
+  "src/models/components/reward_fusion.py",
+  "src/models/components/symmetric_alignment.py",
+  "src/models/components/comet_reward.py",
+  "src/models/grpo_module.py",
+  "src/models/anchored_grpo_module.py",
+  "src/models/components/correction_objective.py",
+  "src/data/translation_datamodule.py",
+  "src/data/components",
+  "src/data/self_play_datamodule.py",
+  "src/models/self_play_module.py",
+  "src/models/sft_module.py",
+  "src/models/components/self_play.py",
+  "src/feedback",
+  "src/utils/self_play_timing.py",
+  "src/utils/credentials.py",
+  "src/utils/phase_timing.py",
+  "src/utils/translation_telemetry.py",
+  "scripts/benchmarks/estimate.py",
+  "scripts/benchmarks/sac.py",
+  "scripts/verify/assets.py",
+  "scripts/verify/gpu.py",
+  "scripts/tools/package.py",
+  "scripts/tools/clean.py",
+  "scripts/rental/session.py",
+  "scripts/benchmarks/self_play.py",
+  "scripts/data/prepare_phomt.py",
+  "scripts/data/prepare_stages.py",
+  "scripts/tools/export_sft.py",
+  "scripts/verify/comet.py",
+  "scripts/benchmarks/stages.py",
+  "scripts/benchmarks/summarize.py",
+  "scripts/benchmarks/memory.py",
+]
+
+[tool.ruff]
+extend-exclude = ["archive", "logs", "data"]

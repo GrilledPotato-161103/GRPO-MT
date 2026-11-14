@@ -1,0 +1,6 @@
+# @package _global_
+# Use an instruction-tuned causal model that already translates your language pair.
+model:
+  model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+  prompt_template: "Translate the following ${model.source_lang} text to ${model.target_lang}. Return only the translation.\nText: {source}\nTranslation:"
+tags: [grpo, causal, machine_translation]

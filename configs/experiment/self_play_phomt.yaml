@@ -1,0 +1,8 @@
+# @package _global_
+# Run scripts.data.prepare_phomt locally before selecting this experiment.
+data:
+  val_file: ${paths.data_dir}/phomt_prepared/validation.csv
+  test_file: ${paths.data_dir}/phomt_test_selected.csv
+  source_column: en
+  target_column: vi
+tags: [self_play, grpo, phomt, en-vi]

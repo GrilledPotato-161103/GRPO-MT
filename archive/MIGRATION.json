@@ -1,0 +1,505 @@
+{
+  "date": "2026-11-11",
+  "moves": [
+    {
+      "old": "scripts/train_bilingual_rental.py",
+      "new": "scripts/main/pipeline.py",
+      "original_sha256": "f732d1755c1ae94acd68b64b4798cdeb23ea9a365a2234fe03fcc0b8a414e996"
+    },
+    {
+      "old": "scripts/prepare_full_phomt.py",
+      "new": "scripts/data/prepare_full.py",
+      "original_sha256": "ed56dfa0250be84f10d0f9f749261e03cffb992c9dafc3f07c6909ebfd9b0287"
+    },
+    {
+      "old": "scripts/prepare_phomt.py",
+      "new": "scripts/data/prepare_phomt.py",
+      "original_sha256": "3cf365ddf170f7ee12f7d4ad0c4a81063714365751043416cdfc580ebcb33a87"
+    },
+    {
+      "old": "scripts/prepare_training_stages.py",
+      "new": "scripts/data/prepare_stages.py",
+      "original_sha256": "ac1b8bbdc23a8199d0559a8ac20621fda0a83f2f80c6a4f309e65b7107f540ef"
+    },
+    {
+      "old": "scripts/audit_scoring_precision.py",
+      "new": "scripts/benchmarks/scoring_precision.py",
+      "original_sha256": "2a7467d625a9344542bde05b171893b1d9bc19ade6860dad642959ceb97002fd"
+    },
+    {
+      "old": "scripts/audit_translation_lengths.py",
+      "new": "scripts/benchmarks/lengths.py",
+      "original_sha256": "f7e73b43fd2f663b6a6a67ca8544836ed0f2e48c510154c6cb03e2ad88a4bdc8"
+    },
+    {
+      "old": "scripts/benchmark_grpo_batching.py",
+      "new": "scripts/benchmarks/grpo.py",
+      "original_sha256": "b13351c4f676a0714648baef693e64c13842a551e6046f173e20533ecb257904"
+    },
+    {
+      "old": "scripts/benchmark_self_play.py",
+      "new": "scripts/benchmarks/self_play.py",
+      "original_sha256": "f7f2c85435e9005e57a444b76195e6018368fd281180a294bb8d896ff05173ee"
+    },
+    {
+      "old": "scripts/benchmark_translation_stages.py",
+      "new": "scripts/benchmarks/stages.py",
+      "original_sha256": "62514619f08c72a5002487df3a1d172f261d01d9d18bdf072eab9d6885fc0fbf"
+    },
+    {
+      "old": "scripts/estimate_self_play.py",
+      "new": "scripts/benchmarks/estimate.py",
+      "original_sha256": "14929a36c443d864f9410596bec632ff428472d3b15ea19c205bbef58a905760"
+    },
+    {
+      "old": "scripts/profile_adapter_memory.py",
+      "new": "scripts/benchmarks/memory.py",
+      "original_sha256": "03d36817f10ea79f27b232ac0afda847727ee6d124a8b33785fb946b95e05fc2"
+    },
+    {
+      "old": "scripts/summarize_stage_profiles.py",
+      "new": "scripts/benchmarks/summarize.py",
+      "original_sha256": "ce603d211fea2bc811f56a7e8bd2b256031e85b1f17de39c355a56b99a61e289"
+    },
+    {
+      "old": "scripts/tune_batch_size.py",
+      "new": "scripts/benchmarks/batch_size.py",
+      "original_sha256": "674a3c7655de492dfcf06a3c3dcbd0a9e3a880a011c4670bf6ac07add059fb59"
+    },
+    {
+      "old": "scripts/tune_token_budget.py",
+      "new": "scripts/benchmarks/token_budget.py",
+      "original_sha256": "77360d016c45a885acb2479dca718a91999e68ba64f2bb23aa1afdaf3cc22e06"
+    },
+    {
+      "old": "scripts/export_sft.py",
+      "new": "scripts/tools/export_sft.py",
+      "original_sha256": "b0c72ff0328fdd11ff1f7c09a0ed48f9cc5890970ffdf8645c8b3f245c7ee595"
+    },
+    {
+      "old": "scripts/rebatch_checkpoint.py",
+      "new": "scripts/tools/rebatch_checkpoint.py",
+      "original_sha256": "9948a57b75ae5943fa1d4be99b86e848f9d8958ae59731ef53d6e1123f9e6908"
+    },
+    {
+      "old": "scripts/package_gpu_test.py",
+      "new": "scripts/tools/package.py",
+      "original_sha256": "f1877c59369b91ab9f152c159680c090c744805f4578c50ed62c25729bfbf8bf"
+    },
+    {
+      "old": "scripts/create_smoke_assets.py",
+      "new": "scripts/verify/assets.py",
+      "original_sha256": "f8fd154ba4d17ba180f22be863da9fb2610e3937d3d0ab21461197e59749bded"
+    },
+    {
+      "old": "scripts/gpu_smoke.py",
+      "new": "scripts/verify/gpu.py",
+      "original_sha256": "87b4473be8271786b499408ec15368dfe12190d638560b2f7803ef6458ec9da1"
+    },
+    {
+      "old": "scripts/verify_cometkiwi.py",
+      "new": "scripts/verify/comet.py",
+      "original_sha256": "af7f064cfbbb10888c0d64a3a2b1b5cb3c18557990ae21e22f393d1896eeb48e"
+    },
+    {
+      "old": "scripts/verify_full_pipeline.py",
+      "new": "scripts/verify/pipeline.py",
+      "original_sha256": "7246b0fa274de4c7e40e08d7230a5681772383ed7c71287e103481388416849b"
+    },
+    {
+      "old": "scripts/rental_snapshot.py",
+      "new": "scripts/rental/snapshot.py",
+      "original_sha256": "da0bbec0c7344013f1bfb571a4e923567792e73fce8699b525b0ae8fa22fc974"
+    },
+    {
+      "old": "scripts/relay_wandb.py",
+      "new": "scripts/rental/wandb_relay.py",
+      "original_sha256": "3804d3d2dd0fcf61849ec7b2568c0098bdf5241c06df3f36f71c5c3f69451557"
+    },
+    {
+      "old": "scripts/watch_vast_training.py",
+      "new": "scripts/rental/supervisor.py",
+      "original_sha256": "6d319931a3d562c6bd0e53d0522b32cfafa8417fb265db5b66ab758373ba320a"
+    },
+    {
+      "old": "scripts/monitor_rental.ps1",
+      "new": "scripts/rental/monitor.ps1",
+      "original_sha256": "4762834e41600e62ea84258f46002b1a6c4d39b5da140a211ab3a85662c48618"
+    },
+    {
+      "old": "scripts/main/config.yaml",
+      "new": "configs/runs/small.yaml",
+      "original_sha256": "758e6a698b4072d46d285be2d57e7083a0e7418dadbe6efc705ff3de04c607e7"
+    },
+    {
+      "old": "scripts/main/full.yaml",
+      "new": "configs/runs/full.yaml",
+      "original_sha256": "21db3c096d591649abe0ec60faf90ff9a3ae50920e32150724a5bccf3de5ccdf"
+    },
+    {
+      "old": "scripts/main/cycles.yaml",
+      "new": "configs/runs/cycles.yaml",
+      "original_sha256": "231718aa832c5ae81075a5697678e6b01b19057043b9d1bf7a438d4ab325d23c"
+    },
+    {
+      "old": "scripts/main/sac.yaml",
+      "new": "configs/runs/sac.yaml",
+      "original_sha256": "329da2d367056d768ae420ff52c949de9e077daaa070b6cb827176f889b04b41"
+    },
+    {
+      "old": "scripts/main/sac_a100.yaml",
+      "new": "configs/runs/a100.yaml",
+      "original_sha256": "1a06788f4417f56b01a48250d69e696851b8345c972dc784113856c5b7fddfbb"
+    },
+    {
+      "old": "scripts/main/sac_4090.yaml",
+      "new": "configs/runs/rtx4090.yaml",
+      "original_sha256": "661b2be7df80a9b81c3c71841b56eff72042696fa74185d5cedb80c9881b740d"
+    },
+    {
+      "old": "docs/a100_full_five_step_20261110.md",
+      "new": "archive/reports/a100_full_five_step_20261110.md",
+      "original_sha256": "554ddd039fb06d9565117b2a6105be662b4e82150ea8dca8b2031e3df6f7173c"
+    },
+    {
+      "old": "docs/a100_handoff.md",
+      "new": "archive/reports/a100_handoff.md",
+      "original_sha256": "e29618af8f00ad627766955b28d6412a9c2bd8cb62c33b2929f14e1d29e29852"
+    },
+    {
+      "old": "docs/active_rental_handoff.md",
+      "new": "archive/reports/active_rental_handoff.md",
+      "original_sha256": "554256aaff87575dcf4651bf6e34cc5ea7962e08ecc71853c325bb5ac755c3cf"
+    },
+    {
+      "old": "docs/bidirectional_training.md",
+      "new": "archive/reports/bidirectional_training.md",
+      "original_sha256": "4cee3596bb384a4aceaf15f414122d76e98e1d63f2127f7b759252f8d7a975d0"
+    },
+    {
+      "old": "docs/current_rental_handoff.md",
+      "new": "archive/reports/current_rental_handoff.md",
+      "original_sha256": "40c7b6908255002fe0af72403ab0dfbae54ebabffdbc3492953c800288656014"
+    },
+    {
+      "old": "docs/feedback_learning_investigation_20261111.md",
+      "new": "docs/research/feedback_learning_investigation_20261111.md",
+      "original_sha256": "af9dbed43486423cd8fa369e792c25a27efbac706e465f6367acc9b9e8e1d197"
+    },
+    {
+      "old": "docs/final_test_and_cleanup_20261111.md",
+      "new": "archive/reports/final_test_and_cleanup_20261111.md",
+      "original_sha256": "a7ddd0a8bd131229a1eafeb81555f15cbf31be912f7ed1d5c2ec81fa1ee3bc96"
+    },
+    {
+      "old": "docs/fresh_a100_handoff.md",
+      "new": "archive/reports/fresh_a100_handoff.md",
+      "original_sha256": "36331b95e7fc1bcb5bb5973f39e4b6dbbdb9974ab3689d3c0f3c9f2decdd246a"
+    },
+    {
+      "old": "docs/full_dataset_training.md",
+      "new": "archive/reports/full_dataset_training.md",
+      "original_sha256": "3ae74fc5d8f34adcd7fbae3b47f85ec65daee960efbd0a7cd1bb52f9ffd52c64"
+    },
+    {
+      "old": "docs/full_training_handoff_20261110.md",
+      "new": "archive/reports/full_training_handoff_20261110.md",
+      "original_sha256": "4cc34375674bb9d916243fe14ad03e708123e5b183991acf07a036d662383d7a"
+    },
+    {
+      "old": "docs/GRPO_MT_BACKLOG.md",
+      "new": "docs/research/GRPO_MT_BACKLOG.md",
+      "original_sha256": "3004e8fdd360a9c7b41949f549faee389eb7d38bb2650b78bbceebf84e93877f"
+    },
+    {
+      "old": "docs/mt_policy_strategy_survey_20261109.md",
+      "new": "docs/research/mt_policy_strategy_survey_20261109.md",
+      "original_sha256": "11ced06e6c2243f7a4f282a7505cc5a38f3f665ce3a30fe718a82a9e0dff6d99"
+    },
+    {
+      "old": "docs/mt_rl_survey.md",
+      "new": "docs/research/mt_rl_survey.md",
+      "original_sha256": "3966f19f60a28e88ef47a4b0657af3c67dd12bc19acac8770074437aa65f786a"
+    },
+    {
+      "old": "docs/rental_training.md",
+      "new": "archive/reports/rental_training.md",
+      "original_sha256": "849f57bdca759f74dd045111047aa9b8f3e05eec0c6b73efc3697f09456e0be3"
+    },
+    {
+      "old": "docs/REWARD_AUDIT_20261109.md",
+      "new": "docs/research/REWARD_AUDIT_20261109.md",
+      "original_sha256": "015e5b771400221e7b4f3263ddf8ee38b0de722c0e9c3377e67bb342fe42a948"
+    },
+    {
+      "old": "docs/sac_grpo_training.md",
+      "new": "docs/training.md",
+      "original_sha256": "6085a8e6a63a8a530751355a1830239b053a154d543471fcc682d542bcb7eee6"
+    },
+    {
+      "old": "docs/sampled_sft_rl_cycles.md",
+      "new": "docs/cycles.md",
+      "original_sha256": "803c8d2dc507b8fd60a8d9b9029d3c621aa7df2d0614b866f96a4ab6b4edc135"
+    },
+    {
+      "old": "docs/sft_stop_evaluation_20261110.md",
+      "new": "archive/reports/sft_stop_evaluation_20261110.md",
+      "original_sha256": "5585aa7e5b2343ae0615d57bdfc590d161b53e1acdb1a58d16c6625a5e4bae1a"
+    },
+    {
+      "old": "docs/validation.md",
+      "new": "archive/reports/validation.md",
+      "original_sha256": "320c121286e328f0316bb8cdb45d8208b05203abc7bce03bc3e4b98d2d7cbb63"
+    },
+    {
+      "old": "docs/vast_bilingual_results_2026-11-08.md",
+      "new": "archive/reports/vast_bilingual_results_2026-11-08.md",
+      "original_sha256": "f19786aff0222c04ee1bab3dd42c1845d1ca88f17bd63bf8f938328e43f75ba6"
+    },
+    {
+      "old": "docs/vast_gpu_test.md",
+      "new": "archive/reports/vast_gpu_test.md",
+      "original_sha256": "1f0d7b38b2a68b023e98719c6d6f8287cc01bbfffda1412e31b2757f3e6f6281"
+    },
+    {
+      "old": "docs/vast_lora_results_2026-11-08.md",
+      "new": "archive/reports/vast_lora_results_2026-11-08.md",
+      "original_sha256": "003c7e85529d96d74af4ae6bed55c43d3b9d21868c6375b2d3d69146e777072a"
+    },
+    {
+      "old": "docs/vast_results_2026-11-07.md",
+      "new": "archive/reports/vast_results_2026-11-07.md",
+      "original_sha256": "c0736f8b1a25c0a9fc9cb0e0d0935fb4b8d5dc4c1c1baccd52587e19463176e5"
+    },
+    {
+      "old": "scripts/run_a100_session.sh",
+      "new": "archive/legacy/scripts/run_a100_session.sh",
+      "original_sha256": "1dff5cce8936e87d31fd331116802ba3ac39dea3a90852d29602660c82965537"
+    },
+    {
+      "old": "scripts/run_bilingual_training.sh",
+      "new": "archive/legacy/scripts/run_bilingual_training.sh",
+      "original_sha256": "ac7c198a429e6f55dd87522460f1722162f8b63a929365264b4471d474dd199c"
+    },
+    {
+      "old": "scripts/run_lora_verification.sh",
+      "new": "archive/legacy/scripts/run_lora_verification.sh",
+      "original_sha256": "5450d743d4a64362fef12ad4bf4da2db87f8a6d60475fa8a5e75644d80a6460d"
+    },
+    {
+      "old": "scripts/run_training_session.sh",
+      "new": "archive/legacy/scripts/run_training_session.sh",
+      "original_sha256": "2f94dd64ea50aabe042153d5363965f41bf28ee0071527351bdb0eded5033289"
+    },
+    {
+      "old": "scripts/run_translation_verification.sh",
+      "new": "archive/legacy/scripts/run_translation_verification.sh",
+      "original_sha256": "9d3398218b296a2a3939b0dee4023a4199b87ab52e12581b4b854b1c9d114601"
+    },
+    {
+      "old": "scripts/run_vast_verification.sh",
+      "new": "archive/legacy/scripts/run_vast_verification.sh",
+      "original_sha256": "5f816c77e4c9548968fcad0060cb85987c664cfdd3f48fe9a7e75cc6ea290985"
+    },
+    {
+      "old": "scripts/schedule.sh",
+      "new": "archive/legacy/scripts/schedule.sh",
+      "original_sha256": "67e8a7e814849daf93366bdaa3b4892ec331c500118488bbd71e9e002ef3476b"
+    },
+    {
+      "old": "scripts/setup_a100_rental.sh",
+      "new": "archive/legacy/scripts/setup_a100_rental.sh",
+      "original_sha256": "147b410212fab0f5835dcd2af6781ba74f0745e65384ab700feda36f521ac755"
+    },
+    {
+      "old": "scripts/setup_fresh_a100.sh",
+      "new": "archive/legacy/scripts/setup_fresh_a100.sh",
+      "original_sha256": "4777300e17524a3f4cad8d93be408a4aafb34df13bd3da3343948049a2c28604"
+    },
+    {
+      "old": "scripts/start_a100_session.sh",
+      "new": "archive/legacy/scripts/start_a100_session.sh",
+      "original_sha256": "e96e03f1342e705e42508e64d7b98736d0ae92af71a71d8cbe130706e15bff36"
+    },
+    {
+      "old": "scripts/start_rental_training.sh",
+      "new": "archive/legacy/scripts/start_rental_training.sh",
+      "original_sha256": "c12d694d0ac29d5acc93c867d8954ff32edea757740a4c493e3ec137a7c28071"
+    },
+    {
+      "old": "scripts/download_rental_comet.py",
+      "new": "archive/legacy/scripts/download_rental_comet.py",
+      "original_sha256": "0f4af469e20e20f509521255df1fb3a0357d2dac8dc7e8ea92068664c48cdc2a"
+    },
+    {
+      "old": "scripts/prepare_a100_resume.py",
+      "new": "archive/legacy/scripts/prepare_a100_resume.py",
+      "original_sha256": "1a1b399d397dce0059f3786b96a46254cc9772ac54f825af65cd83ccf5cfc29f"
+    },
+    {
+      "old": "scripts/restore_rental_cache.py",
+      "new": "archive/legacy/scripts/restore_rental_cache.py",
+      "original_sha256": "85d89b34f740adaa021281a03254d628c9335fc87088a5892573a6933c91a230"
+    },
+    {
+      "old": "scripts/resume_bilingual_rental.py",
+      "new": "archive/legacy/scripts/resume_bilingual_rental.py",
+      "original_sha256": "783d9eb429180c8d8aa1c310a2336533da984ad7e358e06cbede992c8cdba1b9"
+    },
+    {
+      "old": "scripts/stage_fresh_a100.py",
+      "new": "archive/legacy/scripts/stage_fresh_a100.py",
+      "original_sha256": "720aaab5115fe9348238edd235ae7666ee038f6d9290e8ce51c4d15cb011545d"
+    },
+    {
+      "old": "scripts/verify_a100_ten_steps.py",
+      "new": "archive/legacy/scripts/verify_a100_ten_steps.py",
+      "original_sha256": "2482b6abcc11ce0e7040c397ff47c1357d9a3beff38040ae12767cea24a7a402"
+    },
+    {
+      "old": "scripts.sh",
+      "new": "archive/legacy/scripts.sh",
+      "original_sha256": "791f20692038104fb2d92d2250e6f9381a0aba87c41767c3d9b5f03c665fdd2f"
+    },
+    {
+      "old": "configs/rental_a100.json",
+      "new": "archive/legacy/configs/rental_a100.json",
+      "original_sha256": "b96465dc431ab9cd867eac921a54c6ad3d8cb654086c5c733e43d90c13347b20"
+    },
+    {
+      "old": "src/data/mnist_datamodule.py",
+      "new": "archive/template/src/data/mnist_datamodule.py",
+      "original_sha256": "6aab7311b5c7c970c99cdffb2f83a4267dcaa2629bdc392805bed4f877e01c84"
+    },
+    {
+      "old": "src/models/mnist_module.py",
+      "new": "archive/template/src/models/mnist_module.py",
+      "original_sha256": "586e6dc327a0b6cbf1bf827ca04ab7283b6f5c2e1fcd5917a9203476880cdd0d"
+    },
+    {
+      "old": "src/models/components/simple_dense_net.py",
+      "new": "archive/template/src/models/components/simple_dense_net.py",
+      "original_sha256": "2d7386a1ee476f89dfd51f85db63dee79e597fe32cd3134dc6c5d544c643e71b"
+    },
+    {
+      "old": "configs/data/mnist.yaml",
+      "new": "archive/template/configs/data/mnist.yaml",
+      "original_sha256": "54426a51bc96b66c20d7935e48e0014e0d6de97e213583f5e123eb291e91ed6e"
+    },
+    {
+      "old": "configs/model/mnist.yaml",
+      "new": "archive/template/configs/model/mnist.yaml",
+      "original_sha256": "b886afb86d41a6588f02d33d9982f36e4df959b49dfa240daf6fb9c26c608f28"
+    },
+    {
+      "old": "configs/experiment/example.yaml",
+      "new": "archive/template/configs/experiment/example.yaml",
+      "original_sha256": "61b11d236d31eac0a80a0e13384227c7a41e4b5eea772b5d723cd799e4faa261"
+    },
+    {
+      "old": "configs/hparams_search/mnist_optuna.yaml",
+      "new": "archive/template/configs/hparams_search/mnist_optuna.yaml",
+      "original_sha256": "b9f286f9dc473eb71de22c0f295cb793e834e9a3ca910231f0eaad0029b8c451"
+    },
+    {
+      "old": "tests/conftest.py",
+      "new": "archive/template/tests/conftest.py",
+      "original_sha256": "5f2eb4b5fe72f7c35b6667f51b84f7fa1054e583be761b8b00c3c1f7bc0b0a06"
+    },
+    {
+      "old": "tests/test_configs.py",
+      "new": "archive/template/tests/test_configs.py",
+      "original_sha256": "54729196dcdd4466ed9a277dc93f48ab5a638abab9c5bd4a9a034bd030b199ca"
+    },
+    {
+      "old": "tests/test_datamodules.py",
+      "new": "archive/template/tests/test_datamodules.py",
+      "original_sha256": "e04c2f91be08dc64ba9d0cb6f01a6dcee608066f5fe299232deea46bc37d3e5b"
+    },
+    {
+      "old": "tests/test_eval.py",
+      "new": "archive/template/tests/test_eval.py",
+      "original_sha256": "8ba6b6211c337c3a809993475dbab92e6f3ef1c7b7fe5e6075e2f1c1468c4ad2"
+    },
+    {
+      "old": "tests/test_sweeps.py",
+      "new": "archive/template/tests/test_sweeps.py",
+      "original_sha256": "715e1bd4d159430e2bc996de565e5d9b1a9f4bf217698b6a47aa6aba066367cf"
+    },
+    {
+      "old": "tests/test_train.py",
+      "new": "archive/template/tests/test_train.py",
+      "original_sha256": "d128b910befc471736b2dbb93e43d77b572db800f32e6d749d4aaf8e78e756cc"
+    },
+    {
+      "old": "tests/helpers/package_available.py",
+      "new": "archive/template/tests/helpers/package_available.py",
+      "original_sha256": "6b003be9622f8eed784b7d76a74a744b74df495ac46666875c59bfc6f524a9d0"
+    },
+    {
+      "old": "tests/helpers/run_if.py",
+      "new": "archive/template/tests/helpers/run_if.py",
+      "original_sha256": "a099dea54b862a6405cbb24f01b7aebb24760bd392d08537e416a48ed72de692"
+    },
+    {
+      "old": "tests/helpers/run_sh_command.py",
+      "new": "archive/template/tests/helpers/run_sh_command.py",
+      "original_sha256": "a13041c34d7ca83e82b6f53f57925397cb7784af20d424bd43190b67d0b7590a"
+    },
+    {
+      "old": "tests/helpers/__init__.py",
+      "new": "archive/template/tests/helpers/__init__.py",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "old": ".github/workflows/code-quality-main.yaml",
+      "new": "archive/template/.github/workflows/code-quality-main.yaml",
+      "original_sha256": "7896443ca10c09af6523d6df1d20ab534f6d88fe3b2864432df835aa7c3ba338"
+    },
+    {
+      "old": ".github/workflows/code-quality-pr.yaml",
+      "new": "archive/template/.github/workflows/code-quality-pr.yaml",
+      "original_sha256": "41ec6c14507a5b5c6f16aa07e2f38ca0249ca4d82027922dec1816be6196a5b9"
+    },
+    {
+      "old": ".github/workflows/grpo.yml",
+      "new": "archive/template/.github/workflows/grpo.yml",
+      "original_sha256": "16e7e252b90f4b4c195cfc49bb741e902dc685d63059d8da608a3ef4a62004f6"
+    },
+    {
+      "old": ".github/workflows/release-drafter.yml",
+      "new": "archive/template/.github/workflows/release-drafter.yml",
+      "original_sha256": "1b293a45e970d3398bb8ef7e7033a278b715552b9e8662c45910252616a34d2d"
+    },
+    {
+      "old": ".github/workflows/test.yml",
+      "new": "archive/template/.github/workflows/test.yml",
+      "original_sha256": "bbf367508025b5743eb184687e873055f02db0ce59d30b696bc020bb6cab65f4"
+    },
+    {
+      "old": ".github/codecov.yml",
+      "new": "archive/template/.github/codecov.yml",
+      "original_sha256": "ba8b401727def51c6a6ad65b9860b48cb1c0e3599ec44911c6712c1858f10430"
+    },
+    {
+      "old": ".github/dependabot.yml",
+      "new": "archive/template/.github/dependabot.yml",
+      "original_sha256": "24be87c118c70d6a6a0d6a6d899fd0f4f2ebcbea2bde32a57d7bc482cef33042"
+    },
+    {
+      "old": ".github/release-drafter.yml",
+      "new": "archive/template/.github/release-drafter.yml",
+      "original_sha256": "491501364fdfa808e6ae4ef0a1981254959354bc8e20ec65dca4499e975c680f"
+    },
+    {
+      "old": ".pre-commit-config.yaml",
+      "new": "archive/template/.pre-commit-config.yaml",
+      "original_sha256": "f1cb7fced5c486e57a269a3111cb3f2af6d227e817054ae49dd3a6bb6f6dbb8a"
+    },
+    {
+      "old": "Makefile",
+      "new": "archive/template/Makefile",
+      "original_sha256": "9ba702e7c4431ad825a902fc52c00678f12b34770b71e4092508c0bff2cffa01"
+    }
+  ]
+}

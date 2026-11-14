@@ -1,0 +1,20 @@
+# @package _global_
+defaults:
+  - train
+  - override data: translation
+  - override model: grpo
+  - override callbacks: grpo
+  - override logger: csv
+  - _self_
+
+task_name: grpo_mt
+tags: [grpo, machine_translation]
+seed: 42
+optimized_metric: val/chrf
+trainer:
+  max_epochs: 3
+  accelerator: auto
+  devices: 1
+  num_sanity_val_steps: 0
+extras:
+  enforce_tags: false

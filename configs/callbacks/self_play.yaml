@@ -1,0 +1,7 @@
+defaults:
+  - grpo
+  - _self_
+timing:
+  _target_: src.utils.self_play_timing.SelfPlayTiming
+  output_file: ${paths.output_dir}/timing.json
+  warmup_batches: 1

@@ -1,0 +1,6 @@
+# @package _global_
+defaults:
+  - grpo_eval
+  - override model: sft
+  - _self_
+task_name: sft_mt_eval

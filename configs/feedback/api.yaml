@@ -1,0 +1,12 @@
+_target_: src.feedback.judge.TranslationJudge
+backend:
+  _target_: src.feedback.backends.APIChatBackend
+  model: deepseek_v4.1_flash_1017
+  base_url: https://openrouter.ai/api/v1
+  api_key_env: CLAUDE_AUTH_KEY
+  timeout: 60.0
+  concurrency: 4
+  max_retries: 2
+  max_tokens: 256
+  temperature: 0.0
+  json_mode: true

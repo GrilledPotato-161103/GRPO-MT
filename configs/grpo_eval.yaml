@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - eval
+  - experiment: null
+  - override data: translation
+  - override model: grpo
+  - _self_
+seed: 42
+tags: [grpo, evaluation]
+trainer:
+  devices: 1

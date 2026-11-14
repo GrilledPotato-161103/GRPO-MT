@@ -1,0 +1,11 @@
+# @package _global_
+# Qwen2.5-7B has 28 decoder blocks. Restrict adapters, keep the entire base frozen.
+defaults:
+  - phomt_rl_diagnostics
+  - _self_
+model:
+  lora:
+    target_modules: [q_proj, k_proj, v_proj, o_proj]
+    layers_to_transform: [24, 25, 26, 27]
+    layers_pattern: layers
+tags: [grpo, phomt, diagnostics, top4_lora, ablation]

@@ -1,0 +1,14 @@
+# @package _global_
+# Use: python -m src.train --config-name grpo experiment=phomt
+data:
+  train_file: ${paths.data_dir}/phomt_train_selected.csv
+  val_file: null
+  test_file: ${paths.data_dir}/phomt_test_selected.csv
+  source_column: en
+  target_column: vi
+model:
+  # Replace with a translation/SFT checkpoint before meaningful GRPO training.
+  model_name_or_path: google/mt5-small
+  source_lang: English
+  target_lang: Vietnamese
+tags: [grpo, phomt, en-vi]

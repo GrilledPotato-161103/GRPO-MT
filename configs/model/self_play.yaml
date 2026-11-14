@@ -1,0 +1,21 @@
+defaults:
+  - grpo
+  - _self_
+_target_: src.models.self_play_module.SelfPlayGRPOModule
+model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+feedback: ${feedback}
+max_source_length: 1024
+max_new_tokens: 128
+proposal_group_size: 2
+proposal_max_new_tokens: ${model.max_new_tokens}
+proposal_max_chars: 2000
+solver_success_threshold: 0.8
+solver_reward_mode: quality
+proposer_weight: 1.0
+solver_weight: 1.0
+memory_capacity: 128
+memory_examples: 3
+invalid_task_reward: -0.5
+format_error_reward: -1.0
+duplicate_reward: -0.5
+use_chat_template: true

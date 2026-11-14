@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - grpo
+  - feedback: api
+  - override model: self_play
+  - override data: self_play
+  - override callbacks: self_play
+  - _self_
+task_name: self_play_mt
+tags: [self_play, grpo, machine_translation]
+trainer:
+  max_epochs: 1

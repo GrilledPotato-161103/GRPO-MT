@@ -1,0 +1,12 @@
+_target_: src.data.self_play_datamodule.SelfPlayDataModule
+topics: [daily life, travel, science, business, culture]
+steps_per_epoch: 100
+batch_size: 1
+val_file: ${paths.data_dir}/example_val.jsonl
+test_file: ${paths.data_dir}/example_test.jsonl
+source_column: en
+target_column: vi
+seed: ${seed}
+bidirectional: false
+source_lang: ${model.source_lang}
+target_lang: ${model.target_lang}

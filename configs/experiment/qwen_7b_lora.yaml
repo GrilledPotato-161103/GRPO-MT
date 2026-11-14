@@ -1,0 +1,25 @@
+# @package _global_
+# Use with --config-name self_play, or --config-name grpo for parallel-data GRPO.
+model:
+  model_name_or_path: Qwen/Qwen2.5-7B-Instruct
+  load_dtype: bfloat16
+  lora:
+    enabled: true
+    r: 8
+    alpha: 16
+    target_modules: [q_proj, k_proj, v_proj, o_proj]
+    warmup_steps: 10
+  gradient_checkpointing: true
+  logprob_batch_size: 1
+  group_size: 2
+  num_iterations: 2
+  max_source_length: 512
+  max_new_tokens: 64
+  learning_rate: 1.0e-5
+data:
+  batch_size: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  precision: bf16-mixed
+tags: [grpo, lora, qwen-7b]

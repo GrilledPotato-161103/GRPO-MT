@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - grpo_eval
+  - feedback: api
+  - override model: self_play
+  - override data: self_play
+  - _self_
+task_name: self_play_eval

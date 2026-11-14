@@ -1,0 +1,27 @@
+# @package _global_
+defaults:
+  - qwen_7b_lora
+  - _self_
+data:
+  train_file: ${paths.data_dir}/phomt_stages/sft.csv
+  val_file: ${paths.data_dir}/phomt_prepared/validation.csv
+  test_file: ${paths.data_dir}/phomt_test_selected.csv
+  batch_size: 1
+  bidirectional: true
+  augmentation:
+    enabled: true
+model:
+  profiling:
+    enabled: true
+  prompt_template: "Translate {source_lang} to {target_lang}. Return only the translation.\nSource: {source}\nTranslation:"
+  reward:
+    chrf_weight: 0.0
+    bleu_weight: 0.3
+    comet_weight: 0.7
+callbacks:
+  model_checkpoint:
+    monitor: val/chrf_macro
+  early_stopping:
+    monitor: val/chrf_macro
+optimized_metric: val/chrf_macro
+tags: [sft, phomt, bidirectional, lora]

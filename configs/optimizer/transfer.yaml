@@ -1,0 +1,8 @@
+# @package model.optimizer
+_target_: src.models.components.optim.transfer.TransferAdamW
+_partial_: true
+lr: ${model.learning_rate}
+weight_decay: 0.0
+l2sp_weight: 1.0e-3
+max_relative_drift: 0.1
+min_reference_norm: 1.0

@@ -1,0 +1,5 @@
+defaults:
+  - grpo
+  - _self_
+_target_: src.models.sft_module.TranslationSFTModule
+max_target_length: ${model.max_new_tokens}

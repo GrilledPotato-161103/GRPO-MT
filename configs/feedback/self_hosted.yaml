@@ -1,0 +1,11 @@
+_target_: src.feedback.judge.TranslationJudge
+backend:
+  _target_: src.feedback.backends.TransformersChatBackend
+  # Set to a causal instruction model that fits your hardware.
+  model_name_or_path: ???
+  device: cpu
+  dtype: float32
+  revision: main
+  max_new_tokens: 256
+  max_input_tokens: 2048
+  batch_size: 1

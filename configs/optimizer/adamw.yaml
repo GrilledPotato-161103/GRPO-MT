@@ -1,0 +1,5 @@
+# @package model.optimizer
+_target_: torch.optim.AdamW
+_partial_: true
+lr: ${model.learning_rate}
+weight_decay: 0.0

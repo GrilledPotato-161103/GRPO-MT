@@ -20,6 +20,7 @@ parts/
 sdist/
 var/
 wheels/
+runs/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
@@ -146,9 +147,18 @@ dmypy.json
 
 # Lightning-Hydra-Template
 configs/local/default.yaml
-/data/
+/data/*
+!/data/example_train.jsonl
+!/data/example_val.jsonl
+!/data/example_test.jsonl
 /logs/
+/translation_metrics/
+/phase_timing/
+/diagnostics/
 .env
 
 # Aim logging
 .aim
+
+# Disposable lint cache
+.ruff_cache/

@@ -189,9 +189,27 @@ class TranslationDataModule(L.LightningDataModule):
         disk_backed: bool = False,
         paired_batches: bool = False,
         resume_batch_plan: str | None = None,
+        resume_completed_batches: int = 0,
+        resume_epoch: int = 0,
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
+        if type(resume_completed_batches) is not int or resume_completed_batches < 0:
+            raise ValueError("Invalid completed-batch resume offset")
+        if type(resume_epoch) is not int or resume_epoch < 0:
+            raise ValueError("Invalid resume epoch")
+        if resume_completed_batches and (
+            not paired_batches
+            or resume_batch_plan
+            or (augmentation or {}).get("enabled")
+        ):
+            raise ValueError(
+                "Counter-preserving resume requires paired, unaugmented batches and no rebatch plan"
+            )
+        if resume_completed_batches and (length_batching or {}).get("enabled"):
+            raise ValueError(
+                "Counter-preserving paired resume does not support length bucketing"
+            )
         if evaluation_batch_size is not None and (
             isinstance(evaluation_batch_size, bool)
             or not isinstance(evaluation_batch_size, int)
@@ -578,14 +596,20 @@ class TranslationDataModule(L.LightningDataModule):
         if self.hparams["paired_batches"]:
             from src.data.components.length_batching import PairedBatchSampler
 
+            batch_sampler: Any = PairedBatchSampler(
+                len(self.splits[split].rows), batch_size, self.hparams["seed"], shuffle
+            )
+            if split == "train" and self.hparams["resume_completed_batches"]:
+                from src.data.components.resume_sampler import ResumeBatchSampler
+
+                batch_sampler = ResumeBatchSampler(
+                    batch_sampler,
+                    self.hparams["resume_completed_batches"],
+                    self.hparams["resume_epoch"],
+                )
             return DataLoader(
                 self.splits[split],
-                batch_sampler=PairedBatchSampler(
-                    len(self.splits[split].rows),
-                    batch_size,
-                    self.hparams["seed"],
-                    shuffle,
-                ),
+                batch_sampler=batch_sampler,
                 num_workers=self.hparams["num_workers"],
                 pin_memory=self.hparams["pin_memory"],
                 collate_fn=collate_translation,

@@ -1,0 +1,87 @@
+# @package _global_
+# Scalar-only conservative ablation from an existing SFT export; not a validated
+# retraining recipe. Full-corpus findings and training-rollout sensitivity are in
+# docs/correction_training.md. Review candidate pairs before selecting floor/scale
+# or enabling calibrated structured evidence. No rental or training is started.
+data:
+  train_file: ${paths.data_dir}/token256_nllb/rl.csv
+  val_file: ${paths.data_dir}/token256_nllb/validation.csv
+  test_file: ${paths.data_dir}/token256_nllb/test_bounded.csv
+  batch_size: 16
+  evaluation_batch_size: 16
+  bidirectional: true
+  paired_batches: true
+  augmentation:
+    enabled: false
+model:
+  _target_: src.models.anchored_grpo_module.AnchoredGRPOModule
+  model_name_or_path: ${paths.root_dir}/exports/phomt_sft
+  prompt_template: '{source}'
+  language_codes: {English: eng_Latn, Vietnamese: vie_Latn}
+  source_content_limit: 256
+  strict_prompt_length: true
+  max_source_length: 258
+  max_new_tokens: 257
+  temperature: 1.0
+  beta: 0.0
+  kl_control:
+    enabled: false
+  learning_rate: 2.0e-5
+  warmup_steps: 100
+  load_dtype: bfloat16
+  gradient_checkpointing: true
+  logprob_batch_size: 32
+  logprob_token_budget: 4096
+  lora: {enabled: true, r: 8, alpha: 16, dropout: 0.0, target_modules: all-linear}
+  optimizer:
+    _target_: torch.optim.AdamW
+    _partial_: true
+    lr: ${model.learning_rate}
+    weight_decay: 0.0
+  reward:
+    chrf_weight: 0.0
+    bleu_weight: 0.0
+    comet_weight: 1.0
+    comet_device: cuda:0
+    sac:
+      enabled: true
+      consistency_weight: 0.0
+      fusion: {enabled: false}
+      backend:
+        kind: api
+        model: openai/gpt-6-luna
+        base_url: https://openrouter.ai/api/v1
+        api_key_env: ANTHROPIC_AUTH_TOKEN
+        concurrency: 16
+        max_tokens: 32
+  correction:
+    noise_aware: true
+    reward_noise_floor: 0.02 # Conservative control: suppresses 77.62% of eligible archived groups.
+    advantage_scale: 0.1
+    max_advantage: 2.0
+    min_quality_gap: 0.05
+    anchor_comet_min: 0.75 # Heuristic screen; not a calibrated probability of correctness.
+    comet_disagreement_tolerance: 0.02
+    label_smoothing: 0.1
+    candidate_likelihood_weight: 0.1
+    reference_likelihood_weight: 0.25
+    anchor_nll_floor: 0.5
+    criterion_pair_weight: 0.1
+    evidence:
+      enabled: false
+      calibrated: false
+      cache_dir: ${paths.log_dir}/correction_evidence
+      backend:
+        kind: api
+        model: openai/gpt-6-luna
+        base_url: https://openrouter.ai/api/v1
+        api_key_env: ANTHROPIC_AUTH_TOKEN
+        max_tokens: 2048
+        concurrency: 8
+trainer:
+  max_epochs: -1
+  max_steps: 1000
+  val_check_interval: 100
+  check_val_every_n_epoch: null
+  num_sanity_val_steps: 0
+tags: [nllb, noise-aware, correction, experimental]

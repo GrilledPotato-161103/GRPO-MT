@@ -9,10 +9,12 @@ from torch.nn import functional as F
 from torch.nn.utils.rnn import pad_sequence
 
 from src.data.components.multilingual_tokens import multilingual_ids
+from src.models.components.correction_evidence import CorrectionEvidence
 from src.models.components.correction_objective import (
     CorrectionGroup,
     CorrectionOptions,
     correction_loss,
+    noise_aware_advantages,
     quality_scores,
 )
 from src.models.components.grpo import grpo_loss
@@ -39,6 +41,7 @@ class AnchoredGRPOModule(GRPOModule):
         super().__init__(**kwargs)
         self.save_hyperparameters("correction")
         self.correction = options
+        self.correction_evidence = CorrectionEvidence(**options.evidence)
         self._skipped_rollouts = 0
         reward = self.reward_fn
         if not isinstance(reward, TranslationReward) or not reward.sac_enabled:
@@ -108,18 +111,35 @@ class AnchoredGRPOModule(GRPOModule):
             )
         source_langs = batch.get("source_lang", [self.hparams["source_lang"]] * count)
         target_langs = batch.get("target_lang", [self.hparams["target_lang"]] * count)
+        robust = self.correction.noise_aware
+        evidence = self.correction_evidence.assess(
+            [s for s in batch["source"] for _ in range(size)],
+            rollout["predictions"],
+            [s for s in source_langs for _ in range(size)],
+            [s for s in target_langs for _ in range(size)],
+        )
         plans: list[tuple[int, list[int], int | None]] = []
         grpo_groups, needs_reference = [], []
+        abstained, disagreement_pairs = 0, 0
         for group in range(count):
             indices = range(group * size, (group + 1) * size)
             rejected = [
                 i
                 for i in indices
-                if components["sac"][i] < self.correction.rejected_sac_below
+                if (
+                    components["sac"][i] < self.correction.rejected_sac_below
+                    if not robust
+                    else (
+                        rollout["capped"][i]
+                        or not rollout["predictions"][i].strip()
+                        or evidence[i] == "reject"
+                        or (
+                            not self.correction_evidence.enabled
+                            and components["sac"][i] < 1
+                        )
+                    )
+                )
             ]
-            if not rejected:
-                grpo_groups.append(group)
-                continue
             good = [
                 i
                 for i in indices
@@ -127,14 +147,65 @@ class AnchoredGRPOModule(GRPOModule):
                 and components["comet"][i] >= self.correction.anchor_comet_min
                 and not rollout["capped"][i]
                 and rollout["predictions"][i].strip()
+                and (not robust or evidence[i] == "pass")
             ]
+            best_comet = None
+            if self.correction.anchor_selection == "best_comet":
+                complete = [
+                    i
+                    for i in indices
+                    if not rollout["capped"][i] and rollout["predictions"][i].strip()
+                ]
+                best_comet = (
+                    max(complete, key=lambda i: components["comet"][i])
+                    if complete
+                    else None
+                )
+                if self.diagnostics["record_rollouts"] and self._trainer is not None:
+                    from pathlib import Path
+
+                    from src.utils.translation_telemetry import append_record
+
+                    append_record(
+                        Path(self.trainer.default_root_dir)
+                        / "diagnostics/comet_anchor_candidates.jsonl",
+                        {
+                            "optimizer_step": int(self.global_step),
+                            "source": batch["source"][group],
+                            "source_lang": source_langs[group],
+                            "target_lang": target_langs[group],
+                            "selected_candidate": best_comet - group * size
+                            if best_comet is not None
+                            else None,
+                            "source_verified": best_comet in good,
+                            "candidates": [
+                                {
+                                    "text": rollout["predictions"][i],
+                                    "comet": components["comet"][i],
+                                    "source_sac": components["sac"][i],
+                                    "capped": bool(rollout["capped"][i]),
+                                }
+                                for i in indices
+                            ],
+                        },
+                    )
+            if not rejected:
+                if not robust or len(good) == size:
+                    grpo_groups.append(group)
+                else:
+                    abstained += 1
+                continue
             anchor = max(good, key=lambda i: quality[i]) if good else None
+            if self.correction.anchor_selection == "best_comet":
+                # Select by raw QE first, then verify against the actual source.
+                # A lower-scoring candidate does not replace an unverified winner.
+                anchor = best_comet if best_comet in good else None
             plans.append((group, rejected, anchor))
-            if anchor is None:
+            if anchor is None and self.correction.allow_reference_fallback:
                 needs_reference.append(group)
         # Verify only fallback references, never validation/test or a generated
         # "least-bad" target. Malformed/API failures propagate before any update.
-        verified: dict[int, tuple[list[int], float]] = {}
+        verified: dict[int, tuple[list[int], float, float]] = {}
         if needs_reference:
             texts = [batch["reference"][i] for i in needs_reference]
             refs = self._reward_components(
@@ -145,10 +216,17 @@ class AnchoredGRPOModule(GRPOModule):
                 target_langs=[target_langs[i] for i in needs_reference],
             )
             ref_quality = quality_scores(refs["comet"], refs["sac"])
+            ref_evidence = self.correction_evidence.assess(
+                [batch["source"][i] for i in needs_reference],
+                texts,
+                [source_langs[i] for i in needs_reference],
+                [target_langs[i] for i in needs_reference],
+            )
             for j, i in enumerate(needs_reference):
                 if (
                     refs["sac"][j] < self.correction.anchor_sac_min
                     or refs["comet"][j] < self.correction.anchor_comet_min
+                    or (robust and ref_evidence[j] != "pass")
                 ):
                     continue
                 try:
@@ -157,7 +235,7 @@ class AnchoredGRPOModule(GRPOModule):
                     )
                 except ValueError:
                     continue
-                verified[i] = tokens, ref_quality[j]
+                verified[i] = tokens, ref_quality[j], refs["comet"][j]
         # Deduplicate exact completions within each source. Original GRPO rows
         # retain their independent sampling multiplicities through an index map.
         original_count = len(rollout["sequences"])
@@ -188,6 +266,48 @@ class AnchoredGRPOModule(GRPOModule):
             if anchor is None and group not in verified:
                 quarantined += 1
                 continue
+            anchor_quality = (
+                quality[anchor] if anchor is not None else verified[group][1]
+            )
+            anchor_comet = (
+                components["comet"][anchor]
+                if anchor is not None
+                else verified[group][2]
+            )
+            unique = {mapping[i]: i for i in rejected}
+            candidates, weights = [], []
+            for pool_index, original in unique.items():
+                if (
+                    robust
+                    and anchor_comet + self.correction.comet_disagreement_tolerance
+                    < components["comet"][original]
+                ):
+                    disagreement_pairs += 1
+                    continue
+                gap = min(
+                    1.0,
+                    max(
+                        0.0,
+                        anchor_quality
+                        - quality[original]
+                        - self.correction.min_quality_gap,
+                    ),
+                )
+                if (
+                    robust
+                    and self.correction_evidence.enabled
+                    and evidence[original] == "reject"
+                ):
+                    # Separate, calibrated error evidence can discriminate
+                    # fluent/orthographic errors even when QE and SAC tie.
+                    gap = max(gap, self.correction.criterion_pair_weight)
+                if gap > 0:
+                    candidates.append(pool_index)
+                    weights.append(gap)
+            # Uncertain comparisons must not trigger unconditional self-imitation.
+            if robust and not candidates:
+                abstained += 1
+                continue
             if anchor is not None:
                 anchor_index, anchor_quality, provenance = (
                     mapping[anchor],
@@ -195,7 +315,7 @@ class AnchoredGRPOModule(GRPOModule):
                     "candidate",
                 )
             else:
-                tokens, anchor_quality = verified[group]
+                tokens, anchor_quality, _ = verified[group]
                 original = group * size
                 source = {k: v[original] for k, v in rollout["inputs"].items()}
                 if self.is_encoder_decoder:
@@ -218,30 +338,33 @@ class AnchoredGRPOModule(GRPOModule):
                 masks.append(mask)
                 inputs.append(source)
                 reference_count += 1
-            unique = {mapping[i]: i for i in rejected}
-            candidates, weights = [], []
-            for pool_index, original in unique.items():
-                gap = min(
-                    1.0,
-                    max(
-                        0.0,
-                        anchor_quality
-                        - quality[original]
-                        - self.correction.min_quality_gap,
-                    ),
+            likelihood_weight = 1.0
+            if robust:
+                likelihood_weight = (
+                    self.correction.candidate_likelihood_weight
+                    if provenance == "candidate"
+                    else self.correction.reference_likelihood_weight
                 )
-                if gap > 0:
-                    candidates.append(pool_index)
-                    weights.append(gap)
+                likelihood_weight *= max(weights)
             corrections.append(
                 CorrectionGroup(
-                    anchor_index, tuple(candidates), tuple(weights), group, provenance
+                    anchor_index,
+                    tuple(candidates),
+                    tuple(weights),
+                    group,
+                    provenance,
+                    likelihood_weight,
                 )
             )
         # GRPO never sees the correction group's generated or reference targets.
         keep = torch.zeros_like(rollout["advantages"])
         for group in grpo_groups:
             keep[group * size : (group + 1) * size] = 1
+        if robust:
+            rollout["advantages"] = (
+                noise_aware_advantages(rollout["rewards"], size, self.correction)
+                * rollout["update_weights"]
+            )
         rollout["advantages"] = rollout["advantages"] * keep
         pool: dict[str, Any] = {
             "inputs": {k: torch.stack([row[k] for row in inputs]) for k in inputs[0]},
@@ -283,6 +406,16 @@ class AnchoredGRPOModule(GRPOModule):
                 "quarantined_groups": quarantined,
                 "unique_sequences": len(sequences),
                 "original_sequences": original_count,
+                "abstained_groups": abstained,
+                "score_disagreement_pairs": disagreement_pairs,
+                "evidence_enabled": int(self.correction_evidence.enabled),
+                "evidence_unknown_candidates": sum(s == "unknown" for s in evidence),
+                "noise_suppressed_groups": sum(
+                    not rollout["advantages"][g * size : (g + 1) * size].any()
+                    for g in grpo_groups
+                )
+                if robust
+                else 0,
             },
         )
         return rollout
@@ -319,10 +452,13 @@ class AnchoredGRPOModule(GRPOModule):
         # Reusing stale rollout scores after an optimizer update would be wrong.
         scores = pool.pop("initial_scores", None)
         if scores is None:
-            with torch.no_grad(), self.phase_timing.measure(
-                "correction/coefficient_forward",
-                self.device,
-                samples=len(pool["sequences"]),
+            with (
+                torch.no_grad(),
+                self.phase_timing.measure(
+                    "correction/coefficient_forward",
+                    self.device,
+                    samples=len(pool["sequences"]),
+                ),
             ):
                 scores = self._logps(
                     self.policy, pool["inputs"], pool["sequences"], pool["mask"]

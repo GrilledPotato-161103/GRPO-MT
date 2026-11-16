@@ -15,6 +15,7 @@ NAMES = frozenset(
     {
         "adequacy",
         "fluency",
+        "orthography",
         "omission",
         "addition",
         "mistranslation",
@@ -26,7 +27,7 @@ NAMES = frozenset(
     }
 )
 SEVERITIES = frozenset({"none", "minor", "major", "critical"})
-PROMPT_VERSION = "mt-criteria-v1"
+PROMPT_VERSION = "mt-criteria-v2"
 
 
 @dataclass(frozen=True)
@@ -159,6 +160,9 @@ class CriterionJudge:
                 "Each entry has name, applicable (boolean), value (0..1 higher=better or null=unknown), confidence "
                 "(0..1 or null), severity (none/minor/major/critical), evidence (list of quoted spans or concise reasons). "
                 "Assess omissions and unsupported additions separately; inspect negation and numerical meaning. "
+                "Assess fluency independently: literal calques, unnatural collocations and contextually wrong word senses are errors even when the gist is preserved. "
+                "Assess orthography including sentence-initial capitals and target-language proper-name conventions; do not mechanically copy source capitalization. "
+                "Do not invent missing document context; use null when the sentence is ambiguous. "
                 "Accept faithful paraphrases, localization and transliteration. Terminology and format are inapplicable "
                 "without explicit obligations. Do not infer wrong language from names or ambiguous short text. "
                 "Inapplicable/unknown values are null with severity none; error assertions require evidence."

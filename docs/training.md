@@ -1,5 +1,12 @@
 # Dynamic COMET/SAC fusion with parallel bilingual endpoints
 
+Design update, 16 November 2026: the
+[consolidated training scheme](research/translation_training_scheme_20261116.md)
+describes the selected source-grounded MQM direction and current implementation
+status. This document preserves the earlier fusion experiment; its referenced
+historical run profiles are absent from this checkout. New MQM runtime integration
+remains pending.
+
 Use `configs/runs/a100.yaml` for a 40 GiB A100 or `configs/runs/rtx4090.yaml` for 24 GiB.
 Both decode EN -> VI and VI -> EN together. The first 2,000 SFT updates,
 subsequent GRPO, frozen-backbone LoRA, plain AdamW, and disabled KL remain.

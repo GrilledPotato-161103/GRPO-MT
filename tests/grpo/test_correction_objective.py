@@ -73,6 +73,7 @@ def tiny_nllb(path: Path) -> Path:
 def test_hydra_nllb_length_cache_handles_nested_language_codes(tmp_path: Path) -> None:
     import json
     import os
+
     from hydra.utils import instantiate
     from omegaconf import OmegaConf
 
@@ -210,14 +211,15 @@ def test_native_language_prefix_and_sft_target_mask(tmp_path: Path, batch) -> No
     assert torch.isfinite(sft.policy(**inputs).loss)
 
 
+@pytest.mark.parametrize("noise_aware", [False, True])
 def test_microbatched_correction_matches_one_dense_backward(
-    tmp_path: Path, batch
+    tmp_path: Path, batch, noise_aware
 ) -> None:
     from src.models.components.grpo import grpo_loss
 
     torch.set_num_threads(1)
     torch.manual_seed(7)
-    module = make_module(tmp_path)
+    module = make_module(tmp_path, correction={"noise_aware": noise_aware})
     rollout = module._rollout(batch)
     pool = rollout["correction_pool"]
     scores = module._logps(
@@ -542,3 +544,175 @@ def test_native_manifest_reuse_checks_tokenizer_and_csv_identity(
         reuse_manifest(
             source, tmp_path / "tampered", tokenizer, "new-model", "revision"
         )
+
+
+def test_noise_aware_advantages_ignore_small_differences_and_stay_bounded():
+    from src.models.components.correction_objective import noise_aware_advantages
+
+    options = CorrectionOptions(noise_aware=True)
+    tiny = noise_aware_advantages(torch.tensor([0.80, 0.801, 0.802, 0.803]), 4, options)
+    assert tiny.eq(0).all()
+    values = torch.tensor([0.8, 0.9, 0.7, 0.85, 0.3, 0.31, 0.5, 0.2])
+    actual = noise_aware_advantages(values, 4, options)
+    assert actual.abs().max() <= options.max_advantage
+    torch.testing.assert_close(
+        actual.reshape(-1, 4).sum(-1), torch.zeros(2), atol=1e-6, rtol=0
+    )
+    torch.testing.assert_close(
+        actual, noise_aware_advantages(values + 7, 4, options), atol=1e-5, rtol=0
+    )
+    assert (
+        noise_aware_advantages(torch.tensor([0.8, 0.85]), 2, options).abs().max()
+        < noise_aware_advantages(torch.tensor([0.8, 0.95]), 2, options).abs().max()
+    )
+
+
+def test_smoothed_preferences_have_finite_optimum_and_anchor_imitation_stops():
+    options = CorrectionOptions(noise_aware=True)
+    scores = torch.tensor([-0.1, -8.0], requires_grad=True)
+    group = CorrectionGroup(0, (1,), (0.4,), 0, "candidate", 0.1)
+    loss, metrics = correction_loss(scores, [group], options, 1)
+    loss.backward()
+    # Already-confident chosen target has no NLL gradient. An excessive preference
+    # margin is brought back toward the finite soft-label optimum.
+    assert metrics["correction/anchor_nll"] == 0
+    assert scores.grad[0] > 0 > scores.grad[1]
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("reward_noise_floor", 0),
+        ("advantage_scale", float("nan")),
+        ("label_smoothing", 0.5),
+        ("reference_likelihood_weight", 2),
+        ("candidate_likelihood_weight", True),
+        ("noise_aware", 1),
+    ],
+)
+def test_invalid_noise_controls_fail_before_training(field, value):
+    with pytest.raises((ValueError, TypeError)):
+        CorrectionOptions(**{field: value})
+
+
+def test_noise_aware_routes_minor_errors_to_reference_and_suppresses_tiny_qe_gaps(
+    tmp_path, batch, monkeypatch
+):
+    from src.models.grpo_module import GRPOModule
+
+    module = make_module(tmp_path, correction={"noise_aware": True})
+    rollout = GRPOModule._rollout(module, batch)
+    rollout["predictions"] = ["Xin", "world", "Hello", "Hello world"]
+    rollout["capped"][:] = False
+    c = rollout["reward_components"]
+    c["sac"], c["comet"] = [0.7, 0.7, 1.0, 1.0], [0.8, 0.81, 0.8, 0.801]
+    c["reward"] = quality_scores(c["comet"], c["sac"])
+    rollout["rewards"] = torch.tensor(c["reward"])
+    monkeypatch.setattr(GRPOModule, "_rollout", lambda self, batch: rollout)
+    actual = module._rollout(batch)
+    assert actual["advantages"].eq(0).all()
+    assert actual["correction_routes"]["reference_anchors"] == 1
+    assert actual["correction_routes"]["noise_suppressed_groups"] == 1
+    group = actual["correction_groups"][0]
+    assert group.provenance == "training_reference" and len(group.rejected) == 2
+    assert 0 < group.likelihood_weight < 0.25
+    loss, _ = module._backward_rollout(actual, backward_fn=lambda loss: loss.backward())
+    assert torch.isfinite(loss)
+
+
+def test_noise_aware_abstains_when_sac_and_qe_disagree(tmp_path, batch, monkeypatch):
+    from src.models.anchored_grpo_module import NoUsableFeedback
+    from src.models.grpo_module import GRPOModule
+
+    module = make_module(tmp_path, correction={"noise_aware": True})
+    rollout = GRPOModule._rollout(module, batch)
+    rollout["capped"][:] = False
+    rollout["predictions"] = ["Xin", "world", "Hello", "world"]
+    c = rollout["reward_components"]
+    c["sac"], c["comet"] = [1.0, 0.7, 1.0, 0.7], [0.6, 0.9, 0.6, 0.9]
+    c["reward"] = quality_scores(c["comet"], c["sac"])
+    rollout["rewards"] = torch.tensor(c["reward"])
+    monkeypatch.setattr(GRPOModule, "_rollout", lambda self, batch: rollout)
+    with pytest.raises(NoUsableFeedback):
+        module._rollout(batch)
+
+
+def test_robust_profile_composes_via_existing_hydra_entry_point():
+    from hydra import compose, initialize_config_dir
+
+    with initialize_config_dir(
+        config_dir=str(Path("configs").resolve()), version_base="1.3"
+    ):
+        cfg = compose(
+            config_name="grpo", overrides=["experiment=nllb_robust_correction"]
+        )
+    assert cfg.model.correction.noise_aware
+    assert cfg.model.beta == 0 and not cfg.model.correction.evidence.enabled
+    assert cfg.model._target_.endswith("AnchoredGRPOModule")
+
+
+def test_independent_surface_error_is_actionable_when_sac_and_qe_tie(
+    tmp_path, batch, monkeypatch
+):
+    from src.models.grpo_module import GRPOModule
+
+    module = make_module(tmp_path, correction={"noise_aware": True})
+    rollout = GRPOModule._rollout(module, batch)
+    rollout["capped"][:] = False
+    rollout["predictions"] = ["Xin", "world", "Hello", "world"]
+    c = rollout["reward_components"]
+    c["sac"], c["comet"] = [1.0] * 4, [0.8] * 4
+    c["reward"] = quality_scores(c["comet"], c["sac"])
+    rollout["rewards"] = torch.tensor(c["reward"])
+    module.correction_evidence.enabled = True
+    monkeypatch.setattr(
+        module.correction_evidence,
+        "assess",
+        lambda *args: ["pass", "reject", "pass", "reject"],
+    )
+    monkeypatch.setattr(GRPOModule, "_rollout", lambda self, batch: rollout)
+    actual = module._rollout(batch)
+    assert actual["advantages"].eq(0).all()
+    assert len(actual["correction_groups"]) == 2
+    assert all(g.weights == (0.1,) for g in actual["correction_groups"])
+
+
+def test_robust_correction_can_train_and_resume_from_checkpoint(tmp_path, batch):
+    # Run the same two-direction optimizer/checkpoint check with the new objective.
+    module = make_module(tmp_path, correction={"noise_aware": True}, num_iterations=2)
+    trainer = L.Trainer(
+        max_steps=2,
+        logger=False,
+        enable_checkpointing=False,
+        enable_progress_bar=False,
+        enable_model_summary=False,
+        num_sanity_val_steps=0,
+        limit_val_batches=0,
+        accelerator="cpu",
+        devices=1,
+    )
+    trainer.fit(module, train_dataloaders=DataLoader([batch], batch_size=None))
+    assert trainer.global_step == 2
+    path = tmp_path / "robust.ckpt"
+    trainer.save_checkpoint(path)
+    loaded = type(module).load_from_checkpoint(
+        path, reward=module.reward_fn, weights_only=False
+    )
+    assert loaded.correction.noise_aware
+    for name, param in loaded.policy.named_parameters():
+        torch.testing.assert_close(param, dict(module.policy.named_parameters())[name])
+    resumed = L.Trainer(
+        max_steps=4,
+        logger=False,
+        enable_checkpointing=False,
+        enable_progress_bar=False,
+        enable_model_summary=False,
+        num_sanity_val_steps=0,
+        limit_val_batches=0,
+        accelerator="cpu",
+        devices=1,
+    )
+    resumed.fit(
+        loaded, train_dataloaders=DataLoader([batch], batch_size=None), ckpt_path=path
+    )
+    assert resumed.global_step == 4

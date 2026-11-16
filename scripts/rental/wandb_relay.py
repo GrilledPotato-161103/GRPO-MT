@@ -20,6 +20,7 @@ class WandbRelay:
         os.environ["WANDB_DISABLE_GIT"] = "true"
         os.environ["WANDB_CACHE_DIR"] = str(root / "wandb-cache")
         os.environ["WANDB_DATA_DIR"] = str(root / "wandb-data")
+        os.environ["WANDB_CONFIG_DIR"] = str(root / "wandb-config")
         self.root, self.group, self.entity = root, group, entity
         self.run: Any = None
         self.stage: str | None = None
@@ -34,20 +35,29 @@ class WandbRelay:
         import wandb
         from omegaconf import OmegaConf
 
-        cfg = OmegaConf.to_container(OmegaConf.load(directory / "resolved_config.yaml"))
+        config_path = directory / "resolved_config.yaml"
+        cfg = (
+            OmegaConf.to_container(OmegaConf.load(config_path))
+            if config_path.exists()
+            else json.loads((self.root / "run_config.json").read_text())
+        )
+        display = cfg.get("model_name", cfg.get("model", "NLLB-1.3B"))
+        if not isinstance(display, str):
+            display = display.get("model_name_or_path", "NLLB-1.3B")
         self.run = wandb.init(
             project="Machine Translation",
             entity=self.entity,
             id=f"{self.group}-{stage}",
             resume="allow",
             group=self.group,
-            name=f"Qwen2.5-7B-LoRA-{stage}",
+            name=f"{Path(display).name}-LoRA-{stage}",
             job_type=stage,
             dir=str(self.root),
             config={
                 "training": cfg,
                 "telemetry": "local relay; API key never sent to rental",
             },
+            settings=wandb.Settings(x_disable_stats=True),
         )
         from src.utils.translation_telemetry import define_chart_axes
 
@@ -120,8 +130,16 @@ class WandbRelay:
             if result.is_file():
                 data = json.loads(result.read_text(encoding="utf-8"))
                 self.run.log(
-                    {"trainer/global_step": data["global_step"], **data["metrics"]}
+                    {
+                        "trainer/global_step": data.get(
+                            "global_step", data.get("completed_optimizer_steps", 0)
+                        ),
+                        **data.get("metrics", {}),
+                    }
                 )
+                for key in ("best_comet", "test_pairs", "test_checkpoint"):
+                    if key in data:
+                        self.run.summary[key] = data[key]
                 self.run.summary["stage_status"] = "completed"
                 self.completed.add(stage)
                 self.finish()

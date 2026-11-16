@@ -1,10 +1,15 @@
 # Documentation
 
+- [Consolidated optimization and training scheme](research/translation_training_scheme_20261116.md):
+  current EN↔VI design, MQM grading and local losses, penalties/retention,
+  experiment stages, evaluation rules and implementation status.
 - [Procedure handoff](PROCEDURE_HANDOFF.md): effective settings, latest instructions,
   credentials, launch recipe, last verified state and remaining work.
 - [Execution](execution.md): installation, GPU preparation, tmux, train/eval and resume.
 - [Data](data.md): full PhoMT partitions, augmentation, indexing and leakage safeguards.
 - [Training and rewards](training.md): COMET/SAC fusion, curriculum and controls.
+- [Correction training](correction_training.md#noise-aware-correction-ablation-15-november-2026):
+  opt-in noise-aware routing, bounded preferences and independent quality evidence.
 - [Development](development.md): source layout, testing, checks and packaging.
 - [Migration](migration.md): previous commands and their replacements.
 - [LoRA/QLoRA](lora_qwen7b.md), [transfer optimizer](transfer_learning.md),

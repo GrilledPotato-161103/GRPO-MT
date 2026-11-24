@@ -61,6 +61,7 @@ class APIChatBackend:
         transport: httpx.AsyncBaseTransport | None = None,
         retry_backoff: float = 1.0,
         max_retry_delay: float = 30.0,
+        connect_timeout: float | None = None,
     ) -> None:
         if (
             any(
@@ -79,6 +80,15 @@ class APIChatBackend:
                 for value in (timeout, retry_backoff, max_retry_delay)
             )
             or timeout == 0
+            or (
+                connect_timeout is not None
+                and (
+                    isinstance(connect_timeout, bool)
+                    or not isinstance(connect_timeout, (int, float))
+                    or not math.isfinite(connect_timeout)
+                    or connect_timeout <= 0
+                )
+            )
         ):
             raise ValueError(
                 "Invalid feedback concurrency, retries, timeout, or token limit"
@@ -92,6 +102,7 @@ class APIChatBackend:
         self.base_url = base_url.rstrip("/")
         self.api_key_env = api_key_env
         self.timeout = timeout
+        self.connect_timeout = connect_timeout
         self.concurrency = concurrency
         self.max_retries = max_retries
         self.max_tokens = max_tokens
@@ -260,7 +271,12 @@ class APIChatBackend:
     ) -> list[str]:
         active = 0
         async with httpx.AsyncClient(
-            timeout=self.timeout,
+            timeout=httpx.Timeout(
+                self.timeout,
+                connect=self.connect_timeout
+                if self.connect_timeout is not None
+                else self.timeout,
+            ),
             transport=self.transport,
             headers={"Authorization": f"Bearer {key}"},
             follow_redirects=False,
@@ -309,10 +325,20 @@ class APIChatBackend:
                                 stats["max_request_seconds"] = max(
                                     stats["max_request_seconds"], duration
                                 )
-                    except httpx.RequestError:
+                    except httpx.RequestError as error:
+                        error_type = type(error).__name__
+                        # Exception text can contain URLs or credentials. Keep only its type.
+                        log.warning(
+                            "Feedback item %d: %s on attempt %d/%d",
+                            index,
+                            error_type,
+                            transport_retries + 1,
+                            self.max_retries + 1,
+                        )
                         if transport_retries >= self.max_retries:
                             raise FeedbackError(
-                                "Feedback network request failed after bounded retries"
+                                "Feedback network request failed after bounded retries "
+                                f"({error_type}; item {index}; attempts {transport_retries + 1})"
                             ) from None
                     else:
                         status = self._response_status(response)

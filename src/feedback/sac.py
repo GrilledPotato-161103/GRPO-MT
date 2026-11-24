@@ -144,7 +144,7 @@ class SACScorer:
         self._legacy_identity = {
             key: value
             for key, value in self.identity.items()
-            if key not in {"retry_backoff", "max_retry_delay"}
+            if key not in {"retry_backoff", "max_retry_delay", "connect_timeout"}
         }
         # Scheduling and retry controls do not change the judge's semantic answer.
         self.identity = {
@@ -154,6 +154,7 @@ class SACScorer:
             not in {
                 "concurrency",
                 "timeout",
+                "connect_timeout",
                 "max_retries",
                 "retry_backoff",
                 "max_retry_delay",

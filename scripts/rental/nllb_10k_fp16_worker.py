@@ -194,6 +194,17 @@ def reward(config, stage):
                 "concurrency": judge["concurrency"],
                 "temperature": None,
                 "json_mode": False,
+                **{
+                    name: judge[name]
+                    for name in (
+                        "timeout",
+                        "connect_timeout",
+                        "max_retries",
+                        "retry_backoff",
+                        "max_retry_delay",
+                    )
+                    if name in judge
+                },
             },
         }
     return TranslationReward(
@@ -210,7 +221,7 @@ def reward(config, stage):
 def train(config, stage, resume_checkpoint=None):
     import lightning as L
     import torch
-    from lightning.pytorch.callbacks import ModelCheckpoint
+    from lightning.pytorch.callbacks import ModelCheckpoint, RichProgressBar
     from lightning.pytorch.loggers import CSVLogger, WandbLogger
     from lightning.pytorch.plugins.precision import MixedPrecision
 
@@ -369,6 +380,7 @@ def train(config, stage, resume_checkpoint=None):
         callbacks=[
             checkpoint,
             periodic,
+            RichProgressBar(refresh_rate=1),
             TrainingProgress(str(OUTPUT / "STOP"), progress_every=10),
         ],
         num_sanity_val_steps=0,

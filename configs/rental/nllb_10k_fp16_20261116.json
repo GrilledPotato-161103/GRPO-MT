@@ -46,7 +46,12 @@
     "base_url": "https://openrouter.ai/api/v1",
     "key_variable": "OPENROUTER_API_KEY",
     "concurrency": 16,
-    "max_tokens": 32
+    "max_tokens": 32,
+    "timeout": 120,
+    "connect_timeout": 30,
+    "max_retries": 4,
+    "retry_backoff": 2,
+    "max_retry_delay": 15
   },
   "correction": {
     "noise_aware": true,
